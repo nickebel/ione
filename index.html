@@ -4,28 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meu Diário de Bordo</title>
+  
+  <!-- Ícone da Aba do Navegador (Favicon) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+  
   <link rel="stylesheet" href="style.css" />
 </head>
-<body data-theme="dark" data-color="blue">
+<body data-theme="dark" data-bg="default">
   <div class="container">
     <header>
-      <h1>📖 Diário de Bordo</h1>
+      <!-- Ícone e Título no Topo do Site -->
+      <div class="brand">
+        <span class="header-icon">📖</span>
+        <h1>Diário de Bordo</h1>
+      </div>
+      
       <div class="controls">
-        <!-- Alternar Tema Claro/Escuro -->
-        <button id="themeToggleBtn">🌙 Modo Escuro</button>
+        <button id="themeToggleBtn">🌙 Escuro</button>
         
-        <!-- Seleção de Cores de Destaque -->
-        <div class="color-picker">
-          <span class="color-dot blue" onclick="changeAccent('blue')"></span>
-          <span class="color-dot green" onclick="changeAccent('green')"></span>
-          <span class="color-dot purple" onclick="changeAccent('purple')"></span>
-          <span class="color-dot orange" onclick="changeAccent('orange')"></span>
+        <!-- Seleção de Cor do Fundo -->
+        <div class="color-picker" title="Mudar cor do fundo">
+          <span class="color-dot default" onclick="changeBg('default')"></span>
+          <span class="color-dot blue" onclick="changeBg('blue')"></span>
+          <span class="color-dot green" onclick="changeBg('green')"></span>
+          <span class="color-dot purple" onclick="changeBg('purple')"></span>
+          <span class="color-dot warm" onclick="changeBg('warm')"></span>
         </div>
       </div>
     </header>
 
     <main>
-      <!-- Formulário para nova entrada -->
       <section class="entry-form">
         <h2 id="currentDateTitle">Data</h2>
         <textarea id="entryText" placeholder="Escreva sobre o seu dia aqui..."></textarea>
@@ -38,7 +46,6 @@
         <div id="imagePreviewContainer"></div>
       </section>
 
-      <!-- Histórico de registros -->
       <section class="entries-history">
         <h2>📜 Registros Anteriores</h2>
         <div id="entriesList"></div>
