@@ -45,7 +45,6 @@
           <textarea id="entryText" placeholder="Como foi o seu dia? (ou grave um áudio abaixo)"></textarea>
         </div>
 
-        <!-- Painel de Gravador de Áudio -->
         <div id="audioRecorderContainer" class="audio-recorder-box hidden">
           <div class="audio-status">
             <span class="recording-indicator"></span>
@@ -94,14 +93,29 @@
         </div>
       </section>
 
+      <!-- Seção Principal com 3 Abas: Memórias, Lembretes e Lixeira -->
       <section class="timeline-section">
         <div class="tabs-navigation">
           <button id="tabActive" class="tab-btn active" onclick="switchTab('active')">
-            Memórias Registradas
+            Memórias
+          </button>
+          <button id="tabReminders" class="tab-btn" onclick="switchTab('reminders')">
+            🔔 Lembretes (<span id="remindersCount">0</span>)
           </button>
           <button id="tabTrash" class="tab-btn" onclick="switchTab('trash')">
             🗑️ Lixeira (<span id="trashCount">0</span>)
           </button>
+        </div>
+
+        <!-- Formulário de Criar Lembrete -->
+        <div id="reminderFormContainer" class="reminder-form-box hidden">
+          <h3>Novo Lembrete</h3>
+          <input type="text" id="reminderTitle" placeholder="O que você precisa lembrar?" class="reminder-input" />
+          <div class="reminder-dates">
+            <input type="date" id="reminderDate" class="reminder-input" />
+            <input type="time" id="reminderTime" class="reminder-input" value="09:00" />
+          </div>
+          <button class="btn-primary" onclick="addReminder()">Adicionar Lembrete</button>
         </div>
         
         <div id="entriesList" class="entries-list"></div>
