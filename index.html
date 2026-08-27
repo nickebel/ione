@@ -12,7 +12,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
   <link rel="stylesheet" href="style.css" />
 </head>
-<body data-theme="dark" data-palette="champagne">
+<body data-theme="dark" data-palette="tweed">
   <div class="app-wrapper">
     <header class="navbar">
       <div class="brand">
@@ -22,11 +22,11 @@
 
       <div class="header-controls">
         <div class="palette-picker">
+          <button class="dot tweed" onclick="setPalette('tweed')" title="Monocromático"></button>
           <button class="dot champagne" onclick="setPalette('champagne')" title="Champagne"></button>
           <button class="dot olive" onclick="setPalette('olive')" title="Verde Oliva"></button>
           <button class="dot navy" onclick="setPalette('navy')" title="Azul Marinho"></button>
           <button class="dot burgundy" onclick="setPalette('burgundy')" title="Burgundy"></button>
-          <button class="dot tweed" onclick="setPalette('tweed')" title="Tweed"></button>
         </div>
 
         <button id="themeToggleBtn" class="btn-icon" aria-label="Alternar Tema">
@@ -49,11 +49,11 @@
 
         <div class="editor-footer">
           <div class="file-upload">
-            <label for="entryPhoto" class="btn-secondary">
-              <span class="icon">📷</span> Anexar Imagem
+            <label for="entryPhoto" class="btn-primary custom-file-btn">
+              📷 Anexar Imagem
             </label>
             <input type="file" id="entryPhoto" accept="image/*" />
-            <span id="fileName" class="file-name"></span>
+            <button id="removePhotoBtn" class="btn-link hidden" onclick="removeSelectedPhoto()">Remover imagem</button>
           </div>
 
           <div class="action-buttons">
@@ -63,7 +63,23 @@
         </div>
       </section>
 
-      <!-- Seção das Abas (Garante a visibilidade da Lixeira) -->
+      <!-- Calendário de Navegação -->
+      <section class="calendar-section">
+        <div class="calendar-header">
+          <button class="btn-link" onclick="changeMonth(-1)">‹</button>
+          <span id="calendarMonthYear" class="calendar-title"></span>
+          <button class="btn-link" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="calendar-weekdays">
+          <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+        </div>
+        <div id="calendarDays" class="calendar-days"></div>
+        <div id="filterInfo" class="filter-info hidden">
+          <span id="filterLabel"></span>
+          <button class="btn-link" onclick="clearDateFilter()">Limpar filtro</button>
+        </div>
+      </section>
+
       <section class="timeline-section">
         <div class="tabs-navigation">
           <button id="tabActive" class="tab-btn active" onclick="switchTab('active')">
