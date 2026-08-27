@@ -29,38 +29,30 @@ function setDynamicDate() {
   document.getElementById("currentDateTitle").textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
-// Gravação de Áudio com Suporte Universal de Navegador
+// Gravação de Áudio Reforçada
 async function toggleRecording() {
   const recordBtn = document.getElementById("recordAudioBtn");
 
   if (!isRecording) {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("O seu navegador não suporta gravação de áudio ou a página precisa estar usando HTTPS.");
+      alert("Atenção: A gravação de áudio exige conexão segura (HTTPS) ou não é suportada por este navegador.");
       return;
     }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Escolhe o formato aceito pelo navegador (Safari / Chrome / Firefox)
-      let mimeType = 'audio/webm';
-      if (MediaRecorder.isTypeSupported('audio/webm')) {
-        mimeType = 'audio/webm';
-      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-        mimeType = 'audio/mp4';
-      } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-        mimeType = 'audio/ogg';
-      }
-
-      mediaRecorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorder = new MediaRecorder(stream);
       audioChunks = [];
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunks.push(e.data);
+        if (e.data && e.data.size > 0) {
+          audioChunks.push(e.data);
+        }
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: mimeType });
+        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = () => {
@@ -72,7 +64,7 @@ async function toggleRecording() {
         };
       };
 
-      mediaRecorder.start();
+      mediaRecorder.start(100); // Coleta dados a cada 100ms
       isRecording = true;
       recordBtn.textContent = "🛑 Parar Gravação";
       recordBtn.style.backgroundColor = "#ef4444";
@@ -81,8 +73,8 @@ async function toggleRecording() {
       document.getElementById("audioRecorderContainer").classList.remove("hidden");
       startTimer();
     } catch (err) {
-      console.error(err);
-      alert("Erro ao acessar o microfone. Permita o uso do microfone no seu navegador e tente novamente.");
+      console.error("Erro no microfone:", err);
+      alert("Não foi possível acessar o microfone. Verifique se você deu permissão no ícone de cadeado 🔒 ao lado da URL do site.");
     }
   } else {
     stopRecording();
@@ -92,7 +84,9 @@ async function toggleRecording() {
 function stopRecording() {
   if (mediaRecorder && isRecording) {
     mediaRecorder.stop();
-    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    if (mediaRecorder.stream) {
+      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    }
     isRecording = false;
 
     const recordBtn = document.getElementById("recordAudioBtn");
