@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Diário de Bordo</title>
 
-  <!-- Google Fonts: Inter & Playfair Display -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -13,7 +12,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
   <link rel="stylesheet" href="style.css" />
 </head>
-<body data-theme="dark" data-bg="mono">
+<body data-theme="dark" data-palette="champagne">
   <div class="app-wrapper">
     <header class="navbar">
       <div class="brand">
@@ -22,12 +21,13 @@
       </div>
 
       <div class="header-controls">
-        <!-- Palette Selectors -->
+        <!-- 5 Paletas Old Money -->
         <div class="palette-picker">
-          <button class="dot mono" onclick="setPalette('mono')" title="Monocromático"></button>
-          <button class="dot warm" onclick="setPalette('warm')" title="Areia"></button>
-          <button class="dot sage" onclick="setPalette('sage')" title="Menta Muted"></button>
-          <button class="dot navy" onclick="setPalette('navy')" title="Azul Profundo"></button>
+          <button class="dot champagne" onclick="setPalette('champagne')" title="Champagne & Cashmere"></button>
+          <button class="dot olive" onclick="setPalette('olive')" title="Verde Oliva Country Club"></button>
+          <button class="dot navy" onclick="setPalette('navy')" title="Azul Marinho Regatta"></button>
+          <button class="dot burgundy" onclick="setPalette('burgundy')" title="Vinho Barolo"></button>
+          <button class="dot tweed" onclick="setPalette('tweed')" title="Tweed Monocromático"></button>
         </div>
 
         <button id="themeToggleBtn" class="btn-icon" aria-label="Alternar Tema">
