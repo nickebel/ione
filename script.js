@@ -78,7 +78,6 @@ function deleteReminder(id) {
   renderEntries();
 }
 
-// Abrir e Sincronizar no Google Agenda / iOS Calendar
 // Abrir e Sincronizar na Agenda Nativa do Aparelho (iOS / Android)
 function syncToCalendar(title, dateStr, timeStr) {
   const [year, month, day] = dateStr.split('-');
@@ -90,34 +89,32 @@ function syncToCalendar(title, dateStr, timeStr) {
   const isoStart = startDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
   const isoEnd = endDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
 
-  // Detecta se o usuário está acessando por um iPhone/iPad/Mac (iOS/macOS)
+  // Detecta se é dispositivo Apple (iPhone, iPad, Mac)
   const isAppleDevice = /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent);
 
   if (isAppleDevice) {
-    // Conteúdo do arquivo de evento do Calendário do iPhone (.ics)
-    const icsContent = [
+    // Formato estrito para o Calendário do iOS
+    const icsData = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
       'PRODID:-//Diario de Bordo//PT',
+      'CALSCALE:GREGORIAN',
       'BEGIN:VEVENT',
       `SUMMARY:${title}`,
       `DTSTART:${isoStart}`,
       `DTEND:${isoEnd}`,
-      'DESCRIPTION:Criado pelo Diário de Bordo',
+      'DESCRIPTION:Lembrete do Diário de Bordo',
       'END:VEVENT',
       'END:VCALENDAR'
-    ].join('\n');
+    ].join('\r\n');
 
-    // Cria um link para download do evento nativo no iOS
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.setAttribute('download', 'lembrete.ics');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Usa Data URI com redirecionamento direto, que o Safari no iOS entende nativamente
+    const uri = 'data:text/calendar;charset=utf8,' + encodeURIComponent(icsData);
+    
+    // Abre no Safari acionando o aplicativo de Calendário do iPhone
+    window.location.href = uri;
   } else {
-    // Para Android/Windows continua abrindo o Google Agenda
+    // Para Android/Windows mantém o Google Agenda
     const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${isoStart}/${isoEnd}&details=${encodeURIComponent('Criado pelo Diário de Bordo')}`;
     window.open(googleCalendarUrl, '_blank');
   }
