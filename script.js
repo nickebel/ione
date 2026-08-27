@@ -1,11 +1,11 @@
 let currentPhotoBase64 = "";
 let editingId = null;
-let currentTab = "active"; // "active" ou "trash"
+let currentTab = "active";
 
 document.addEventListener("DOMContentLoaded", () => {
   setDynamicDate();
   loadPreferences();
-  cleanOldTrashEntries(); // Limpa notas com mais de 30 dias automaticamente
+  cleanOldTrashEntries();
   renderEntries();
 
   document.getElementById("entryPhoto").addEventListener("change", handlePhotoUpload);
@@ -73,14 +73,13 @@ function renderEntries() {
   const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
   const container = document.getElementById("entriesList");
 
-  // Filtra dependendo da aba ativa
   const filtered = entries.filter(e => currentTab === "trash" ? e.deletedAt !== null : !e.deletedAt);
   const trashCount = entries.filter(e => e.deletedAt !== null).length;
 
   document.getElementById("trashCount").textContent = trashCount;
 
   if (filtered.length === 0) {
-    const msg = currentTab === "trash" ? "Lixeira vazia." : "Nenhum registro até o momento.";
+    const msg = currentTab === "trash" ? "Nenhuma nota na lixeira." : "Nenhum registro até o momento.";
     container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">${msg}</p>`;
     return;
   }
@@ -100,7 +99,7 @@ function renderEntries() {
         <div class="entry-meta">
           <div>
             <time>${entry.date}</time>
-            ${currentTab === "trash" ? `<span class="trash-warning">(Apaga em ${daysRemaining} dias)</span>` : ''}
+            ${currentTab === "trash" ? `<span class="trash-warning">(Apaga em ${daysRemaining}d)</span>` : ''}
           </div>
           <div class="card-actions">
             ${currentTab === "active" ? `
@@ -141,7 +140,7 @@ function restoreEntry(id) {
 }
 
 function permanentDelete(id) {
-  if (confirm("Deseja excluir permanentemente este registro? Não será possível recuperar.")) {
+  if (confirm("Deseja excluir definitivamente? Esta ação é irreversível.")) {
     let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
     entries = entries.filter(e => e.id !== id);
     localStorage.setItem("journal_entries", JSON.stringify(entries));
@@ -149,7 +148,6 @@ function permanentDelete(id) {
   }
 }
 
-// Limpeza automática após 30 dias
 function cleanOldTrashEntries() {
   const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
   const now = Date.now();
