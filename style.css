@@ -104,8 +104,12 @@ body {
 }
 
 .current-date {
-  font-family: var(--font-serif); font-style: italic;
-  color: var(--text-muted); font-size: 1rem; margin-bottom: 16px;
+  font-family: var(--font-serif);
+  font-style: normal; /* Remove o itálico */
+  font-weight: 500;
+  color: var(--text-main); /* Usa a cor principal em vez de desbotada */
+  font-size: 1.1rem;
+  margin-bottom: 16px;
 }
 
 textarea {
