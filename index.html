@@ -63,11 +63,15 @@
         </div>
       </section>
 
-      <!-- Abas para alternar entre Ativas e Lixeira -->
+      <!-- Seção das Abas (Garante a visibilidade da Lixeira) -->
       <section class="timeline-section">
-        <div class="tabs">
-          <button id="tabActive" class="tab-btn active" onclick="switchTab('active')">Memórias Registradas</button>
-          <button id="tabTrash" class="tab-btn" onclick="switchTab('trash')">Lixeira (<span id="trashCount">0</span>)</button>
+        <div class="tabs-navigation">
+          <button id="tabActive" class="tab-btn active" onclick="switchTab('active')">
+            Memórias Registradas
+          </button>
+          <button id="tabTrash" class="tab-btn" onclick="switchTab('trash')">
+            🗑️ Lixeira (<span id="trashCount">0</span>)
+          </button>
         </div>
         
         <div id="entriesList" class="entries-list"></div>
