@@ -6,121 +6,71 @@
 }
 
 /* ===================================================
-   PALETAS PASTÉIS - MODO ESCURO (Tons Muted & Suaves)
+   PALETAS PASTÉIS ULTRA-SUAVES (MODO ESCURO - Muted/Soft)
    =================================================== */
 
-/* Creme / Champagne Suave */
-[data-theme="dark"][data-palette="champagne"] {
-  --bg-main: #2b2823;
-  --bg-surface: #38342e;
-  --border-subtle: #4a453d;
-  --text-main: #f0eae1;
-  --text-muted: #b8af9f;
-  --accent: #e6d3a7;
-  --accent-text: #2b2823;
-}
-
-/* Verde Sálvia Pastel */
-[data-theme="dark"][data-palette="olive"] {
-  --bg-main: #232a25;
-  --bg-surface: #2d3630;
-  --border-subtle: #3f4a42;
-  --text-main: #e8efe9;
-  --text-muted: #a3b3a7;
-  --accent: #b4c5b8;
-  --accent-text: #232a25;
-}
-
-/* Azul Névoa Pastel */
-[data-theme="dark"][data-palette="navy"] {
-  --bg-main: #202733;
-  --bg-surface: #293242;
-  --border-subtle: #3a465c;
-  --text-main: #ebf1f7;
-  --text-muted: #a1b0cc;
-  --accent: #b8c8e0;
-  --accent-text: #202733;
-}
-
-/* Vinho Rosé Muted Pastel */
-[data-theme="dark"][data-palette="burgundy"] {
-  --bg-main: #2c2023;
-  --bg-surface: #382a2e;
-  --border-subtle: #4e3c41;
-  --text-main: #f5ebed;
-  --text-muted: #c2a8ae;
-  --accent: #dbb3bc;
-  --accent-text: #2c2023;
-}
-
-/* Tweed / Cinza Areia */
+/* Monocromático (Grafite Sutil) */
 [data-theme="dark"][data-palette="tweed"] {
-  --bg-main: #242426;
-  --bg-surface: #2e2e30;
-  --border-subtle: #424245;
-  --text-main: #f0f0f2;
-  --text-muted: #aaaaaf;
-  --accent: #d1d1d6;
-  --accent-text: #242426;
+  --bg-main: #18181a; --bg-surface: #222225; --border-subtle: #303035;
+  --text-main: #ededf0; --text-muted: #94949e; --accent: #ededf0; --accent-text: #18181a;
+}
+
+/* Creme / Champagne Minimal */
+[data-theme="dark"][data-palette="champagne"] {
+  --bg-main: #1a1816; --bg-surface: #24211e; --border-subtle: #332f2a;
+  --text-main: #f2eee9; --text-muted: #a19a91; --accent: #d9cdbd; --accent-text: #1a1816;
+}
+
+/* Verde Sálvia Pálido */
+[data-theme="dark"][data-palette="olive"] {
+  --bg-main: #161a17; --bg-surface: #202622; --border-subtle: #2d3630;
+  --text-main: #edf2ee; --text-muted: #919e94; --accent: #bfccc2; --accent-text: #161a17;
+}
+
+/* Azul Névoa Suave */
+[data-theme="dark"][data-palette="navy"] {
+  --bg-main: #16191f; --bg-surface: #20242e; --border-subtle: #2d3342;
+  --text-main: #f0f3f7; --text-muted: #939eb3; --accent: #c0c9d9; --accent-text: #16191f;
+}
+
+/* Rosé Acinzentado */
+[data-theme="dark"][data-palette="burgundy"] {
+  --bg-main: #1c1819; --bg-surface: #262123; --border-subtle: #383033;
+  --text-main: #f5f0f1; --text-muted: #a6989b; --accent: #d6c5c8; --accent-text: #1c1819;
 }
 
 /* ===================================================
-   PALETAS PASTÉIS - MODO CLARO (Tons Clássicos e Delicados)
+   PALETAS PASTÉIS ULTRA-SUAVES (MODO CLARO - Papel Muted)
    =================================================== */
 
-/* Creme / Champagne Suave */
-[data-theme="light"][data-palette="champagne"] {
-  --bg-main: #f7f4ee;
-  --bg-surface: #ffffff;
-  --border-subtle: #e8e1d5;
-  --text-main: #332f28;
-  --text-muted: #807667;
-  --accent: #474138;
-  --accent-text: #f7f4ee;
-}
-
-/* Verde Sálvia Pastel */
-[data-theme="light"][data-palette="olive"] {
-  --bg-main: #f2f5f3;
-  --bg-surface: #ffffff;
-  --border-subtle: #dce3dd;
-  --text-main: #273029;
-  --text-muted: #6b7a6d;
-  --accent: #37453a;
-  --accent-text: #ffffff;
-}
-
-/* Azul Névoa Pastel */
-[data-theme="light"][data-palette="navy"] {
-  --bg-main: #f2f5f8;
-  --bg-surface: #ffffff;
-  --border-subtle: #dbe2ec;
-  --text-main: #212936;
-  --text-muted: #65758c;
-  --accent: #2e3a4e;
-  --accent-text: #ffffff;
-}
-
-/* Vinho Rosé Muted Pastel */
-[data-theme="light"][data-palette="burgundy"] {
-  --bg-main: #f9f4f5;
-  --bg-surface: #ffffff;
-  --border-subtle: #ede0e2;
-  --text-main: #362629;
-  --text-muted: #826b70;
-  --accent: #4a373a;
-  --accent-text: #ffffff;
-}
-
-/* Tweed / Cinza Areia */
+/* Monocromático (Preto & Branco Neutro) */
 [data-theme="light"][data-palette="tweed"] {
-  --bg-main: #f4f4f5;
-  --bg-surface: #ffffff;
-  --border-subtle: #e0e0e2;
-  --text-main: #28282a;
-  --text-muted: #707075;
-  --accent: #333336;
-  --accent-text: #ffffff;
+  --bg-main: #f7f7f8; --bg-surface: #ffffff; --border-subtle: #e4e4e7;
+  --text-main: #18181b; --text-muted: #71717a; --accent: #18181b; --accent-text: #ffffff;
+}
+
+/* Creme / Champagne Pálido */
+[data-theme="light"][data-palette="champagne"] {
+  --bg-main: #f8f6f2; --bg-surface: #ffffff; --border-subtle: #e9e4dc;
+  --text-main: #24211e; --text-muted: #827b72; --accent: #24211e; --accent-text: #ffffff;
+}
+
+/* Verde Sálvia Pálido */
+[data-theme="light"][data-palette="olive"] {
+  --bg-main: #f4f6f4; --bg-surface: #ffffff; --border-subtle: #e0e6e2;
+  --text-main: #1c221e; --text-muted: #728075; --accent: #1c221e; --accent-text: #ffffff;
+}
+
+/* Azul Névoa Suave */
+[data-theme="light"][data-palette="navy"] {
+  --bg-main: #f4f6f9; --bg-surface: #ffffff; --border-subtle: #e0e5ed;
+  --text-main: #1a202c; --text-muted: #6a7890; --accent: #1a202c; --accent-text: #ffffff;
+}
+
+/* Rosé Acinzentado */
+[data-theme="light"][data-palette="burgundy"] {
+  --bg-main: #f9f6f7; --bg-surface: #ffffff; --border-subtle: #ebe1e3;
+  --text-main: #241e20; --text-muted: #827376; --accent: #241e20; --accent-text: #ffffff;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -154,18 +104,18 @@ body {
 .header-controls { display: flex; align-items: center; gap: 20px; }
 .palette-picker { display: flex; gap: 8px; }
 
-/* Indicadores das Bolinhas com cores pastéis correspondentes */
+/* Indicadores sutis das cores */
 .dot {
-  width: 18px; height: 18px; border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.2); cursor: pointer;
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1px solid var(--border-subtle); cursor: pointer;
   transition: transform 0.2s ease;
 }
 .dot:hover { transform: scale(1.25); }
-.dot.champagne { background: #e6d3a7; }
-.dot.olive { background: #b4c5b8; }
-.dot.navy { background: #b8c8e0; }
-.dot.burgundy { background: #dbb3bc; }
-.dot.tweed { background: #d1d1d6; }
+.dot.tweed { background: #8e8e93; }
+.dot.champagne { background: #d9cdbd; }
+.dot.olive { background: #bfccc2; }
+.dot.navy { background: #c0c9d9; }
+.dot.burgundy { background: #d6c5c8; }
 
 .btn-icon {
   background: transparent; border: none; color: var(--text-main);
@@ -188,7 +138,7 @@ textarea {
   color: var(--text-main); font-family: var(--font-sans); font-size: 1rem;
   line-height: 1.7; resize: vertical; outline: none;
 }
-textarea::placeholder { color: var(--text-muted); opacity: 0.8; }
+textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
 
 .preview-container { margin-top: 16px; }
 .preview-img {
@@ -228,7 +178,7 @@ input[type="file"] { display: none; }
   display: flex;
   gap: 24px;
   margin-bottom: 24px;
-  border-bottom: 2px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 8px;
 }
 
@@ -236,7 +186,7 @@ input[type="file"] { display: none; }
   background: transparent;
   border: none;
   font-family: var(--font-serif);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -246,18 +196,17 @@ input[type="file"] { display: none; }
 
 .tab-btn.active {
   color: var(--text-main);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .tab-btn.active::after {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -9px;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 2px;
   background: var(--text-main);
-  border-radius: 2px;
 }
 
 .entry-card {
@@ -272,7 +221,7 @@ input[type="file"] { display: none; }
 }
 
 .trash-warning {
-  font-size: 0.75rem; font-style: italic; opacity: 0.9; margin-left: 8px;
+  font-size: 0.75rem; font-style: italic; opacity: 0.8; margin-left: 8px;
 }
 
 .entry-body {
@@ -291,6 +240,6 @@ input[type="file"] { display: none; }
   font-size: 0.8rem; cursor: pointer;
 }
 .action-btn:hover { color: var(--text-main); }
-.action-btn.delete:hover { color: #e57373; }
+.action-btn.delete:hover { color: #d9534f; }
 
 .hidden { display: none !important; }
