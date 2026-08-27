@@ -7,7 +7,7 @@ let recordingSeconds = 0;
 let isRecording = false;
 
 let editingId = null;
-let currentTab = "active";
+let currentTab = "active"; // "active", "reminders" ou "trash"
 let selectedFilterDate = null;
 let currentCalendarDate = new Date();
 
@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setDynamicDate();
   loadPreferences();
   cleanOldTrashEntries();
+  setDefaultReminderDate();
   renderCalendar();
   renderEntries();
 
@@ -29,26 +30,194 @@ function setDynamicDate() {
   document.getElementById("currentDateTitle").textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
-// Gravação de Áudio Reforçada
+function setDefaultReminderDate() {
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  document.getElementById("reminderDate").value = todayStr;
+}
+
+// Lógica de Lembretes & Sincronização com Agenda do Celular
+function addReminder() {
+  const title = document.getElementById("reminderTitle").value.trim();
+  const dateVal = document.getElementById("reminderDate").value;
+  const timeVal = document.getElementById("reminderTime").value;
+
+  if (!title || !dateVal || !timeVal) {
+    alert("Preencha o título, a data e a hora do lembrete.");
+    return;
+  }
+
+  const reminders = JSON.parse(localStorage.getItem("journal_reminders") || "[]");
+  
+  const newReminder = {
+    id: Date.now(),
+    title: title,
+    date: dateVal,
+    time: timeVal,
+    completed: false
+  };
+
+  reminders.unshift(newReminder);
+  localStorage.setItem("journal_reminders", JSON.stringify(reminders));
+
+  document.getElementById("reminderTitle").value = "";
+  renderEntries();
+}
+
+function toggleReminderStatus(id) {
+  let reminders = JSON.parse(localStorage.getItem("journal_reminders") || "[]");
+  reminders = reminders.map(r => r.id === id ? { ...r, completed: !r.completed } : r);
+  localStorage.setItem("journal_reminders", JSON.stringify(reminders));
+  renderEntries();
+}
+
+function deleteReminder(id) {
+  let reminders = JSON.parse(localStorage.getItem("journal_reminders") || "[]");
+  reminders = reminders.filter(r => r.id !== id);
+  localStorage.setItem("journal_reminders", JSON.stringify(reminders));
+  renderEntries();
+}
+
+// Abrir e Sincronizar no Google Agenda / iOS Calendar
+function syncToCalendar(title, dateStr, timeStr) {
+  const [year, month, day] = dateStr.split('-');
+  const [hours, minutes] = timeStr.split(':');
+
+  const startDate = new Date(year, month - 1, day, hours, minutes);
+  const endDate = new Date(startDate.getTime() + 30 * 60 * 1000); // 30 mins de duração
+
+  const isoStart = startDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
+  const isoEnd = endDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+  // Link universal do Google Calendar (funciona no Android, iPhone e PC)
+  const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${isoStart}/${isoEnd}&details=${encodeURIComponent('Criado pelo Diário de Bordo')}`;
+
+  window.open(googleCalendarUrl, '_blank');
+}
+
+// Alternar entre Memórias, Lembretes e Lixeira
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById("tabActive").classList.toggle("active", tab === "active");
+  document.getElementById("tabReminders").classList.toggle("active", tab === "reminders");
+  document.getElementById("tabTrash").classList.toggle("active", tab === "trash");
+
+  const reminderBox = document.getElementById("reminderFormContainer");
+  if (tab === "reminders") {
+    reminderBox.classList.remove("hidden");
+  } else {
+    reminderBox.classList.add("hidden");
+  }
+
+  renderEntries();
+}
+
+function renderEntries() {
+  const container = document.getElementById("entriesList");
+
+  // Atualizar contador de Lembretes
+  const reminders = JSON.parse(localStorage.getItem("journal_reminders") || "[]");
+  document.getElementById("remindersCount").textContent = reminders.filter(r => !r.completed).length;
+
+  if (currentTab === "reminders") {
+    if (reminders.length === 0) {
+      container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">Nenhum lembrete registrado.</p>`;
+      return;
+    }
+
+    container.innerHTML = reminders.map(r => {
+      const [y, m, d] = r.date.split('-');
+      const formattedDate = `${d}/${m}/${y}`;
+
+      return `
+        <article class="entry-card" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" ${r.completed ? 'checked' : ''} onchange="toggleReminderStatus(${r.id})" style="width:18px; height:18px; cursor:pointer;" />
+              <span style="font-size:1rem; ${r.completed ? 'text-decoration:line-through; opacity:0.6;' : ''}">${escapeHtml(r.title)}</span>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">📅 ${formattedDate} às ${r.time}</div>
+          </div>
+          <div class="card-actions">
+            <button class="action-btn" onclick="syncToCalendar('${escapeHtml(r.title)}', '${r.date}', '${r.time}')" title="Adicionar à Agenda do Celular">📅 Sincronizar</button>
+            <button class="action-btn delete" onclick="deleteReminder(${r.id})">Apagar</button>
+          </div>
+        </article>
+      `;
+    }).join("");
+    return;
+  }
+
+  // Renderizar Memórias ou Lixeira
+  const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
+  let filtered = entries.filter(e => currentTab === "trash" ? e.deletedAt !== null : !e.deletedAt);
+
+  if (selectedFilterDate && currentTab === "active") {
+    filtered = filtered.filter(e => e.isoDate === selectedFilterDate);
+  }
+
+  const trashCount = entries.filter(e => e.deletedAt !== null).length;
+  document.getElementById("trashCount").textContent = trashCount;
+
+  if (filtered.length === 0) {
+    const msg = selectedFilterDate 
+      ? "Nenhuma nota registrada nesta data." 
+      : (currentTab === "trash" ? "Nenhuma nota na lixeira." : "Nenhum registro até o momento.");
+    container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">${msg}</p>`;
+    return;
+  }
+
+  const now = Date.now();
+  const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+
+  container.innerHTML = filtered.map(entry => {
+    let daysRemaining = 30;
+    if (entry.deletedAt) {
+      const elapsed = now - entry.deletedAt;
+      daysRemaining = Math.max(0, Math.ceil((THIRTY_DAYS - elapsed) / (1000 * 60 * 60 * 24)));
+    }
+
+    return `
+      <article class="entry-card">
+        <div class="entry-meta">
+          <div>
+            <time class="entry-date">${entry.date}</time>
+            ${currentTab === "trash" ? `<span class="trash-warning">(Apaga em ${daysRemaining}d)</span>` : ''}
+          </div>
+          <div class="card-actions">
+            ${currentTab === "active" ? `
+              <button class="action-btn" onclick="editEntry(${entry.id})">Editar</button>
+              <button class="action-btn delete" onclick="moveToTrash(${entry.id})">Apagar</button>
+            ` : `
+              <button class="action-btn" onclick="restoreEntry(${entry.id})">Restaurar</button>
+              <button class="action-btn delete" onclick="permanentDelete(${entry.id})">Excluir Definitivamente</button>
+            `}
+          </div>
+        </div>
+        ${entry.text ? `<div class="entry-body">${escapeHtml(entry.text)}</div>` : ''}
+        ${entry.audio ? `<audio controls src="${entry.audio}" class="entry-audio"></audio>` : ''}
+        ${entry.photo ? `<img src="${entry.photo}" class="entry-img" alt="Anexo" />` : ''}
+      </article>
+    `;
+  }).join("");
+}
+
 async function toggleRecording() {
   const recordBtn = document.getElementById("recordAudioBtn");
 
   if (!isRecording) {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Atenção: A gravação de áudio exige conexão segura (HTTPS) ou não é suportada por este navegador.");
+      alert("Atenção: A gravação de áudio exige conexão segura (HTTPS).");
       return;
     }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
       mediaRecorder = new MediaRecorder(stream);
       audioChunks = [];
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          audioChunks.push(e.data);
-        }
+        if (e.data && e.data.size > 0) audioChunks.push(e.data);
       };
 
       mediaRecorder.onstop = () => {
@@ -64,7 +233,7 @@ async function toggleRecording() {
         };
       };
 
-      mediaRecorder.start(100); // Coleta dados a cada 100ms
+      mediaRecorder.start(100);
       isRecording = true;
       recordBtn.textContent = "🛑 Parar Gravação";
       recordBtn.style.backgroundColor = "#ef4444";
@@ -73,8 +242,7 @@ async function toggleRecording() {
       document.getElementById("audioRecorderContainer").classList.remove("hidden");
       startTimer();
     } catch (err) {
-      console.error("Erro no microfone:", err);
-      alert("Não foi possível acessar o microfone. Verifique se você deu permissão no ícone de cadeado 🔒 ao lado da URL do site.");
+      alert("Não foi possível acessar o microfone. Verifique a permissão do seu navegador.");
     }
   } else {
     stopRecording();
@@ -84,9 +252,7 @@ async function toggleRecording() {
 function stopRecording() {
   if (mediaRecorder && isRecording) {
     mediaRecorder.stop();
-    if (mediaRecorder.stream) {
-      mediaRecorder.stream.getTracks().forEach(track => track.stop());
-    }
+    if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(track => track.stop());
     isRecording = false;
 
     const recordBtn = document.getElementById("recordAudioBtn");
@@ -109,9 +275,7 @@ function startTimer() {
   }, 1000);
 }
 
-function stopTimer() {
-  clearInterval(recordingTimerInterval);
-}
+function stopTimer() { clearInterval(recordingTimerInterval); }
 
 function removeAudio() {
   currentAudioBase64 = "";
@@ -250,69 +414,6 @@ function clearDateFilter() {
   renderEntries();
 }
 
-function renderEntries() {
-  const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
-  const container = document.getElementById("entriesList");
-
-  let filtered = entries.filter(e => currentTab === "trash" ? e.deletedAt !== null : !e.deletedAt);
-
-  if (selectedFilterDate && currentTab === "active") {
-    filtered = filtered.filter(e => e.isoDate === selectedFilterDate);
-  }
-
-  const trashCount = entries.filter(e => e.deletedAt !== null).length;
-  document.getElementById("trashCount").textContent = trashCount;
-
-  if (filtered.length === 0) {
-    const msg = selectedFilterDate 
-      ? "Nenhuma nota registrada nesta data." 
-      : (currentTab === "trash" ? "Nenhuma nota na lixeira." : "Nenhum registro até o momento.");
-    container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">${msg}</p>`;
-    return;
-  }
-
-  const now = Date.now();
-  const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-
-  container.innerHTML = filtered.map(entry => {
-    let daysRemaining = 30;
-    if (entry.deletedAt) {
-      const elapsed = now - entry.deletedAt;
-      daysRemaining = Math.max(0, Math.ceil((THIRTY_DAYS - elapsed) / (1000 * 60 * 60 * 24)));
-    }
-
-    return `
-      <article class="entry-card">
-        <div class="entry-meta">
-          <div>
-            <time class="entry-date">${entry.date}</time>
-            ${currentTab === "trash" ? `<span class="trash-warning">(Apaga em ${daysRemaining}d)</span>` : ''}
-          </div>
-          <div class="card-actions">
-            ${currentTab === "active" ? `
-              <button class="action-btn" onclick="editEntry(${entry.id})">Editar</button>
-              <button class="action-btn delete" onclick="moveToTrash(${entry.id})">Apagar</button>
-            ` : `
-              <button class="action-btn" onclick="restoreEntry(${entry.id})">Restaurar</button>
-              <button class="action-btn delete" onclick="permanentDelete(${entry.id})">Excluir Definitivamente</button>
-            `}
-          </div>
-        </div>
-        ${entry.text ? `<div class="entry-body">${escapeHtml(entry.text)}</div>` : ''}
-        ${entry.audio ? `<audio controls src="${entry.audio}" class="entry-audio"></audio>` : ''}
-        ${entry.photo ? `<img src="${entry.photo}" class="entry-img" alt="Anexo" />` : ''}
-      </article>
-    `;
-  }).join("");
-}
-
-function switchTab(tab) {
-  currentTab = tab;
-  document.getElementById("tabActive").classList.toggle("active", tab === "active");
-  document.getElementById("tabTrash").classList.toggle("active", tab === "trash");
-  renderEntries();
-}
-
 function moveToTrash(id) {
   let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
   entries = entries.map(e => e.id === id ? { ...e, deletedAt: Date.now() } : e);
@@ -386,9 +487,7 @@ function editEntry(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function cancelEdit() {
-  resetForm();
-}
+function cancelEdit() { resetForm(); }
 
 function resetForm() {
   editingId = null;
