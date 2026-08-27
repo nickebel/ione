@@ -149,21 +149,41 @@ input[type="file"] { display: none; }
 }
 .btn-link:hover { color: var(--text-main); }
 
-/* Abas Ativas vs Lixeira */
-.tabs {
-  display: flex; gap: 24px; margin-bottom: 24px;
-  border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;
+/* Estilo das Abas com destaque visual */
+.tabs-navigation {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--border-subtle);
+  padding-bottom: 8px;
 }
 
 .tab-btn {
-  background: transparent; border: none; font-family: var(--font-serif);
-  font-size: 1.05rem; color: var(--text-muted); cursor: pointer;
-  transition: color 0.2s; padding-bottom: 4px; position: relative;
+  background: transparent;
+  border: none;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding-bottom: 6px;
+  position: relative;
 }
-.tab-btn.active { color: var(--text-main); font-weight: 500; }
+
+.tab-btn.active {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
 .tab-btn.active::after {
-  content: ''; position: absolute; bottom: -9px; left: 0; right: 0;
-  height: 2px; background: var(--text-main);
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--text-main);
+  border-radius: 2px;
 }
 
 .entry-card {
