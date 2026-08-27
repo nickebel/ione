@@ -45,7 +45,7 @@
           <textarea id="entryText" placeholder="Como foi o seu dia? (ou grave um áudio abaixo)"></textarea>
         </div>
 
-        <!-- Painel do Gravador de Áudio -->
+        <!-- Painel de Gravador de Áudio -->
         <div id="audioRecorderContainer" class="audio-recorder-box hidden">
           <div class="audio-status">
             <span class="recording-indicator"></span>
@@ -63,7 +63,8 @@
               📷 Imagem
             </label>
             <input type="file" id="entryPhoto" accept="image/*" />
-            <button id="recordAudioBtn" class="btn-primary" onclick="toggleRecording()">
+            
+            <button id="recordAudioBtn" type="button" class="btn-primary" onclick="toggleRecording()">
               🎙️ Gravar Áudio
             </button>
             <button id="removePhotoBtn" class="btn-link hidden" onclick="removeSelectedPhoto()">Remover imagem</button>
