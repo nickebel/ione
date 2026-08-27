@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meu Diário de Bordo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-theme="dark" data-color="blue">
+  <div class="container">
+    <header>
+      <h1>📖 Diário de Bordo</h1>
+      <div class="controls">
+        <!-- Alternar Tema Claro/Escuro -->
+        <button id="themeToggleBtn">🌙 Modo Escuro</button>
+        
+        <!-- Seleção de Cores de Destaque -->
+        <div class="color-picker">
+          <span class="color-dot blue" onclick="changeAccent('blue')"></span>
+          <span class="color-dot green" onclick="changeAccent('green')"></span>
+          <span class="color-dot purple" onclick="changeAccent('purple')"></span>
+          <span class="color-dot orange" onclick="changeAccent('orange')"></span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Formulário para nova entrada -->
+      <section class="entry-form">
+        <h2 id="currentDateTitle">Data</h2>
+        <textarea id="entryText" placeholder="Escreva sobre o seu dia aqui..."></textarea>
+        
+        <div class="form-actions">
+          <label class="file-label" for="entryPhoto">📷 Anexar Foto</label>
+          <input type="file" id="entryPhoto" accept="image/*" />
+          <button id="saveBtn" onclick="saveEntry()">Salvar Registro</button>
+        </div>
+        <div id="imagePreviewContainer"></div>
+      </section>
+
+      <!-- Histórico de registros -->
+      <section class="entries-history">
+        <h2>📜 Registros Anteriores</h2>
+        <div id="entriesList"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
