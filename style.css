@@ -103,11 +103,12 @@ body {
   transition: var(--transition);
 }
 
+/* Data do Topo do Editor Sem Itálico */
 .current-date {
   font-family: var(--font-serif);
-  font-style: normal; /* Remove o itálico */
+  font-style: normal;
   font-weight: 500;
-  color: var(--text-main); /* Usa a cor principal em vez de desbotada */
+  color: var(--text-main);
   font-size: 1.1rem;
   margin-bottom: 16px;
 }
@@ -118,6 +119,27 @@ textarea {
   line-height: 1.7; resize: vertical; outline: none;
 }
 textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
+
+/* Caixinha da Reflexão da IA */
+.ai-reflection-box {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.ai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+}
 
 .preview-container { margin-top: 16px; }
 .preview-img {
@@ -213,7 +235,6 @@ input[type="file"] { display: none; }
   font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;
 }
 
-/* Data da Nota com a Fonte Playfair Display */
 .entry-date {
   font-family: var(--font-serif);
   font-size: 1rem;
