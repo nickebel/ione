@@ -1,9 +1,11 @@
 let currentPhotoBase64 = "";
 let editingId = null;
+let currentTab = "active"; // "active" ou "trash"
 
 document.addEventListener("DOMContentLoaded", () => {
   setDynamicDate();
   loadPreferences();
+  cleanOldTrashEntries(); // Limpa notas com mais de 30 dias automaticamente
   renderEntries();
 
   document.getElementById("entryPhoto").addEventListener("change", handlePhotoUpload);
@@ -56,7 +58,8 @@ function saveEntry() {
       id: Date.now(),
       date: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
       text: text,
-      photo: currentPhotoBase64
+      photo: currentPhotoBase64,
+      deletedAt: null
     };
     entries.unshift(newEntry);
   }
@@ -70,24 +73,94 @@ function renderEntries() {
   const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
   const container = document.getElementById("entriesList");
 
-  if (entries.length === 0) {
-    container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">Nenhum registro até o momento.</p>`;
+  // Filtra dependendo da aba ativa
+  const filtered = entries.filter(e => currentTab === "trash" ? e.deletedAt !== null : !e.deletedAt);
+  const trashCount = entries.filter(e => e.deletedAt !== null).length;
+
+  document.getElementById("trashCount").textContent = trashCount;
+
+  if (filtered.length === 0) {
+    const msg = currentTab === "trash" ? "Lixeira vazia." : "Nenhum registro até o momento.";
+    container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">${msg}</p>`;
     return;
   }
 
-  container.innerHTML = entries.map(entry => `
-    <article class="entry-card">
-      <div class="entry-meta">
-        <time>${entry.date}</time>
-        <div class="card-actions">
-          <button class="action-btn" onclick="editEntry(${entry.id})">Editar</button>
-          <button class="action-btn delete" onclick="deleteEntry(${entry.id})">Apagar</button>
+  const now = Date.now();
+  const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+
+  container.innerHTML = filtered.map(entry => {
+    let daysRemaining = 30;
+    if (entry.deletedAt) {
+      const elapsed = now - entry.deletedAt;
+      daysRemaining = Math.max(0, Math.ceil((THIRTY_DAYS - elapsed) / (1000 * 60 * 60 * 24)));
+    }
+
+    return `
+      <article class="entry-card">
+        <div class="entry-meta">
+          <div>
+            <time>${entry.date}</time>
+            ${currentTab === "trash" ? `<span class="trash-warning">(Apaga em ${daysRemaining} dias)</span>` : ''}
+          </div>
+          <div class="card-actions">
+            ${currentTab === "active" ? `
+              <button class="action-btn" onclick="editEntry(${entry.id})">Editar</button>
+              <button class="action-btn delete" onclick="moveToTrash(${entry.id})">Apagar</button>
+            ` : `
+              <button class="action-btn" onclick="restoreEntry(${entry.id})">Restaurar</button>
+              <button class="action-btn delete" onclick="permanentDelete(${entry.id})">Excluir Definitivamente</button>
+            `}
+          </div>
         </div>
-      </div>
-      <div class="entry-body">${escapeHtml(entry.text)}</div>
-      ${entry.photo ? `<img src="${entry.photo}" class="entry-img" alt="Anexo" />` : ''}
-    </article>
-  `).join("");
+        <div class="entry-body">${escapeHtml(entry.text)}</div>
+        ${entry.photo ? `<img src="${entry.photo}" class="entry-img" alt="Anexo" />` : ''}
+      </article>
+    `;
+  }).join("");
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById("tabActive").classList.toggle("active", tab === "active");
+  document.getElementById("tabTrash").classList.toggle("active", tab === "trash");
+  renderEntries();
+}
+
+function moveToTrash(id) {
+  let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
+  entries = entries.map(e => e.id === id ? { ...e, deletedAt: Date.now() } : e);
+  localStorage.setItem("journal_entries", JSON.stringify(entries));
+  renderEntries();
+}
+
+function restoreEntry(id) {
+  let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
+  entries = entries.map(e => e.id === id ? { ...e, deletedAt: null } : e);
+  localStorage.setItem("journal_entries", JSON.stringify(entries));
+  renderEntries();
+}
+
+function permanentDelete(id) {
+  if (confirm("Deseja excluir permanentemente este registro? Não será possível recuperar.")) {
+    let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
+    entries = entries.filter(e => e.id !== id);
+    localStorage.setItem("journal_entries", JSON.stringify(entries));
+    renderEntries();
+  }
+}
+
+// Limpeza automática após 30 dias
+function cleanOldTrashEntries() {
+  const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
+  const now = Date.now();
+  const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+
+  const validEntries = entries.filter(e => {
+    if (!e.deletedAt) return true;
+    return (now - e.deletedAt) < THIRTY_DAYS;
+  });
+
+  localStorage.setItem("journal_entries", JSON.stringify(validEntries));
 }
 
 function editEntry(id) {
@@ -126,15 +199,6 @@ function resetForm() {
   document.getElementById("imagePreviewContainer").innerHTML = "";
   document.getElementById("saveBtn").textContent = "Publicar";
   document.getElementById("cancelBtn").classList.add("hidden");
-}
-
-function deleteEntry(id) {
-  if (confirm("Deseja remover esta nota?")) {
-    let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
-    entries = entries.filter(e => e.id !== id);
-    localStorage.setItem("journal_entries", JSON.stringify(entries));
-    renderEntries();
-  }
 }
 
 function setPalette(palette) {
