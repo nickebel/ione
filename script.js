@@ -22,6 +22,70 @@ function setDynamicDate() {
   document.getElementById("currentDateTitle").textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
+// Lógica da IA para gerar reflexão do dia
+async function generateReflection() {
+  const textInput = document.getElementById("entryText");
+  const text = textInput.value.trim();
+
+  if (!text) {
+    alert("Escreva algo no seu dia antes de gerar uma reflexão!");
+    return;
+  }
+
+  let apiKey = localStorage.getItem("gemini_api_key");
+
+  if (!apiKey) {
+    apiKey = prompt("Cole sua API Key gratuita do Google Gemini para ativar a IA:\n(A chave fica salva apenas no seu navegador)");
+    if (!apiKey) return;
+    localStorage.setItem("gemini_api_key", apiKey.trim());
+  }
+
+  const aiBtn = document.getElementById("aiBtn");
+  const reflectionBox = document.getElementById("aiReflectionContainer");
+  const reflectionText = document.getElementById("aiReflectionText");
+
+  aiBtn.disabled = true;
+  aiBtn.textContent = "Gerando...";
+  reflectionBox.classList.remove("hidden");
+  reflectionText.textContent = "Pensando em uma reflexão para o seu dia...";
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `Você é um mentor calmo, empático e elegante. Leia o seguinte relato de diário e forneça uma reflexão curta, inspiradora e acolhedora de 2 a 3 frases:\n\n"${text}"`
+          }]
+        }]
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      localStorage.removeItem("gemini_api_key");
+      alert("Chave da API inválida ou expirada. Tente gerar novamente inserindo uma nova chave.");
+      closeAiReflection();
+    } else {
+      const resultText = data.candidates[0].content.parts[0].text;
+      reflectionText.textContent = resultText;
+    }
+  } catch (error) {
+    alert("Ocorreu um erro ao conectar com a IA. Verifique sua conexão de internet.");
+    closeAiReflection();
+  } finally {
+    aiBtn.disabled = false;
+    aiBtn.textContent = "✨ Gerar Reflexão";
+  }
+}
+
+function closeAiReflection() {
+  document.getElementById("aiReflectionContainer").classList.add("hidden");
+  document.getElementById("aiReflectionText").textContent = "";
+}
+
 function handlePhotoUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -45,7 +109,12 @@ function removeSelectedPhoto() {
 
 function saveEntry() {
   const textInput = document.getElementById("entryText");
-  const text = textInput.value.trim();
+  let text = textInput.value.trim();
+
+  const reflectionText = document.getElementById("aiReflectionText").textContent.trim();
+  if (reflectionText) {
+    text += `\n\n✨ Reflexão do Dia:\n${reflectionText}`;
+  }
 
   if (!text && !currentPhotoBase64) return;
 
@@ -281,6 +350,7 @@ function resetForm() {
   document.getElementById("entryPhoto").value = "";
   document.getElementById("imagePreviewContainer").innerHTML = "";
   document.getElementById("removePhotoBtn").classList.add("hidden");
+  closeAiReflection();
   document.getElementById("saveBtn").textContent = "Publicar";
   document.getElementById("cancelBtn").classList.add("hidden");
 }
