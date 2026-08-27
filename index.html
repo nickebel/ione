@@ -21,13 +21,12 @@
       </div>
 
       <div class="header-controls">
-        <!-- 5 Paletas Old Money -->
         <div class="palette-picker">
-          <button class="dot champagne" onclick="setPalette('champagne')" title="Champagne & Cashmere"></button>
-          <button class="dot olive" onclick="setPalette('olive')" title="Verde Oliva Country Club"></button>
-          <button class="dot navy" onclick="setPalette('navy')" title="Azul Marinho Regatta"></button>
-          <button class="dot burgundy" onclick="setPalette('burgundy')" title="Vinho Barolo"></button>
-          <button class="dot tweed" onclick="setPalette('tweed')" title="Tweed Monocromático"></button>
+          <button class="dot champagne" onclick="setPalette('champagne')" title="Champagne"></button>
+          <button class="dot olive" onclick="setPalette('olive')" title="Verde Oliva"></button>
+          <button class="dot navy" onclick="setPalette('navy')" title="Azul Marinho"></button>
+          <button class="dot burgundy" onclick="setPalette('burgundy')" title="Burgundy"></button>
+          <button class="dot tweed" onclick="setPalette('tweed')" title="Tweed"></button>
         </div>
 
         <button id="themeToggleBtn" class="btn-icon" aria-label="Alternar Tema">
@@ -64,10 +63,13 @@
         </div>
       </section>
 
+      <!-- Abas para alternar entre Ativas e Lixeira -->
       <section class="timeline-section">
-        <div class="timeline-header">
-          <h2>Memórias Registradas</h2>
+        <div class="tabs">
+          <button id="tabActive" class="tab-btn active" onclick="switchTab('active')">Memórias Registradas</button>
+          <button id="tabTrash" class="tab-btn" onclick="switchTab('trash')">Lixeira (<span id="trashCount">0</span>)</button>
         </div>
+        
         <div id="entriesList" class="entries-list"></div>
       </section>
     </main>
