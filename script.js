@@ -1,147 +1,163 @@
-:root {
-  --bg-primary: #f1f5f9;
-  --bg-card: #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --border-color: #cbd5e1;
-  --accent-color: #2563eb;
+let currentPhotoBase64 = "";
+let editingId = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  setDynamicDate();
+  loadPreferences();
+  renderEntries();
+
+  document.getElementById("entryPhoto").addEventListener("change", handlePhotoUpload);
+  document.getElementById("themeToggleBtn").addEventListener("click", toggleTheme);
+});
+
+function setDynamicDate() {
+  const now = new Date();
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById("currentDateTitle").textContent = now.toLocaleDateString('pt-BR', options);
 }
 
-/* Modo Escuro Padrão */
-[data-theme="dark"] {
-  --bg-primary: #0f172a;
-  --bg-card: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --border-color: #334155;
+function handlePhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    currentPhotoBase64 = event.target.result;
+    document.getElementById("imagePreviewContainer").innerHTML = 
+      `<img src="${currentPhotoBase64}" class="preview-img" alt="Prévia" />`;
+  };
+  reader.readAsDataURL(file);
 }
 
-/* Alteração Completa da Cor de Fundo (Temas Customizados) */
-[data-bg="blue"] { --bg-primary: #1e3a8a; }
-[data-bg="green"] { --bg-primary: #064e3b; }
-[data-bg="purple"] { --bg-primary: #4c1d95; }
-[data-bg="warm"] { --bg-primary: #7c2d12; }
+function saveEntry() {
+  const text = document.getElementById("entryText").value.trim();
+  if (!text && !currentPhotoBase64) {
+    alert("Escreva algo ou adicione uma foto!");
+    return;
+  }
 
-/* Para modo claro com cores de fundo */
-[data-theme="light"][data-bg="blue"] { --bg-primary: #dbeafe; }
-[data-theme="light"][data-bg="green"] { --bg-primary: #d1fae5; }
-[data-theme="light"][data-bg="purple"] { --bg-primary: #f3e8ff; }
-[data-theme="light"][data-bg="warm"] { --bg-primary: #ffedd5; }
+  let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
 
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  margin: 0;
-  padding: 20px;
-  transition: background-color 0.3s ease;
+  if (editingId) {
+    // Editar registro existente
+    entries = entries.map(entry => {
+      if (entry.id === editingId) {
+        return {
+          ...entry,
+          text: text,
+          photo: currentPhotoBase64 !== "" ? currentPhotoBase64 : entry.photo
+        };
+      }
+      return entry;
+    });
+    editingId = null;
+    document.getElementById("saveBtn").textContent = "Salvar Registro";
+  } else {
+    // Criar novo registro
+    const newEntry = {
+      id: Date.now(),
+      date: new Date().toLocaleString('pt-BR'),
+      text: text,
+      photo: currentPhotoBase64
+    };
+    entries.unshift(newEntry);
+  }
+
+  localStorage.setItem("journal_entries", JSON.stringify(entries));
+
+  // Limpar campos
+  document.getElementById("entryText").value = "";
+  document.getElementById("entryPhoto").value = "";
+  document.getElementById("imagePreviewContainer").innerHTML = "";
+  currentPhotoBase64 = "";
+
+  renderEntries();
 }
 
-.container { max-width: 800px; margin: 0 auto; }
+function renderEntries() {
+  const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
+  const container = document.getElementById("entriesList");
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+  if (entries.length === 0) {
+    container.innerHTML = "<p style='color: var(--text-secondary);'>Nenhum registro até agora.</p>";
+    return;
+  }
+
+  container.innerHTML = entries.map(entry => `
+    <div class="entry-card">
+      <div class="entry-header">
+        <span>${entry.date}</span>
+        <div class="entry-actions">
+          <button class="btn-edit" onclick="editEntry(${entry.id})">✏️ Editar</button>
+          <button class="btn-delete" onclick="deleteEntry(${entry.id})">🗑️ Apagar</button>
+        </div>
+      </div>
+      <p style="white-space: pre-wrap;">${escapeHtml(entry.text)}</p>
+      ${entry.photo ? `<img src="${entry.photo}" class="entry-img" alt="Foto" />` : ''}
+    </div>
+  `).join("");
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+// Preenche o formulário para edição
+function editEntry(id) {
+  const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
+  const entryToEdit = entries.find(e => e.id === id);
+
+  if (entryToEdit) {
+    document.getElementById("entryText").value = entryToEdit.text;
+    currentPhotoBase64 = entryToEdit.photo || "";
+    
+    if (currentPhotoBase64) {
+      document.getElementById("imagePreviewContainer").innerHTML = 
+        `<img src="${currentPhotoBase64}" class="preview-img" alt="Prévia" />`;
+    } else {
+      document.getElementById("imagePreviewContainer").innerHTML = "";
+    }
+
+    editingId = id;
+    document.getElementById("saveBtn").textContent = "Atualizar Registro";
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
-.header-icon { font-size: 2rem; }
-
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+// Apagar registro
+function deleteEntry(id) {
+  if (confirm("Tem certeza que deseja apagar este registro?")) {
+    let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
+    entries = entries.filter(entry => entry.id !== id);
+    localStorage.setItem("journal_entries", JSON.stringify(entries));
+    renderEntries();
+  }
 }
 
-button {
-  background-color: var(--accent-color);
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
+// Trocar Fundo Inteiro
+function changeBg(colorName) {
+  document.body.setAttribute("data-bg", colorName);
+  localStorage.setItem("journal_bg", colorName);
 }
 
-.color-picker { display: flex; gap: 8px; }
-.color-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid var(--bg-card);
-}
-.color-dot.default { background-color: #64748b; }
-.color-dot.blue { background-color: #2563eb; }
-.color-dot.green { background-color: #059669; }
-.color-dot.purple { background-color: #7c3aed; }
-.color-dot.warm { background-color: #ea580c; }
-
-.entry-form, .entry-card {
-  background-color: var(--bg-card);
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  margin-bottom: 24px;
+// Trocar Tema (Escuro / Claro)
+function toggleTheme() {
+  const body = document.body;
+  const currentTheme = body.getAttribute("data-theme");
+  const newTheme = currentTheme === "dark" ? "light" : "dark";
+  
+  body.setAttribute("data-theme", newTheme);
+  document.getElementById("themeToggleBtn").textContent = newTheme === "dark" ? "🌙 Escuro" : "☀️ Claro";
+  localStorage.setItem("journal_theme", newTheme);
 }
 
-textarea {
-  width: 100%;
-  height: 120px;
-  background-color: transparent;
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px;
-  box-sizing: border-box;
-  font-family: inherit;
+function loadPreferences() {
+  const savedTheme = localStorage.getItem("journal_theme") || "dark";
+  const savedBg = localStorage.getItem("journal_bg") || "default";
+
+  document.body.setAttribute("data-theme", savedTheme);
+  document.body.setAttribute("data-bg", savedBg);
+  document.getElementById("themeToggleBtn").textContent = savedTheme === "dark" ? "🌙 Escuro" : "☀️ Claro";
 }
 
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, match => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[match]));
 }
-
-.file-label {
-  background-color: var(--border-color);
-  color: var(--text-primary);
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-input[type="file"] { display: none; }
-
-.preview-img, .entry-img {
-  max-width: 100%;
-  max-height: 300px;
-  border-radius: 8px;
-  margin-top: 12px;
-  object-fit: cover;
-}
-
-.entry-header {
-  display: flex;
-  justify-content: space-between;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  margin-bottom: 12px;
-}
-
-.entry-actions button {
-  background: none;
-  padding: 4px 8px;
-  margin-left: 4px;
-  font-size: 0.8rem;
-}
-.btn-edit { color: #3b82f6; }
-.btn-delete { color: #ef4444; }
