@@ -104,7 +104,6 @@ body {
 .header-controls { display: flex; align-items: center; gap: 20px; }
 .palette-picker { display: flex; gap: 8px; }
 
-/* Indicadores sutis das cores */
 .dot {
   width: 16px; height: 16px; border-radius: 50%;
   border: 1px solid var(--border-subtle); cursor: pointer;
@@ -152,15 +151,34 @@ textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
 }
 
 input[type="file"] { display: none; }
-.btn-secondary {
-  font-size: 0.85rem; color: var(--text-muted); cursor: pointer;
-  display: flex; align-items: center; gap: 6px; transition: color 0.2s;
+
+.file-upload {
+  display: flex;
+  align-items: center;
 }
-.btn-secondary:hover { color: var(--text-main); }
-.file-name { font-size: 0.75rem; color: var(--text-muted); margin-left: 8px; }
+
+/* Botão Anexar Imagem padronizado como o botão Publicar */
+.btn-secondary {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s ease;
+}
+.btn-secondary:hover { opacity: 0.85; }
+
+.file-name { font-size: 0.75rem; color: var(--text-muted); margin-left: 10px; }
 
 .action-buttons { display: flex; align-items: center; gap: 12px; }
 
+/* Botão Publicar */
 .btn-primary {
   background: var(--accent); color: var(--accent-text); border: none;
   padding: 8px 20px; border-radius: 20px; font-size: 0.85rem;
