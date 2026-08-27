@@ -45,6 +45,15 @@
           <textarea id="entryText" placeholder="Como foi o seu dia?"></textarea>
         </div>
 
+        <!-- Bloco para exibir a reflexão da IA -->
+        <div id="aiReflectionContainer" class="ai-reflection-box hidden">
+          <div class="ai-header">
+            <span>✨ Reflexão da IA</span>
+            <button class="btn-link" onclick="closeAiReflection()">✕</button>
+          </div>
+          <p id="aiReflectionText"></p>
+        </div>
+
         <div id="imagePreviewContainer" class="preview-container"></div>
 
         <div class="editor-footer">
@@ -57,13 +66,14 @@
           </div>
 
           <div class="action-buttons">
+            <button id="aiBtn" class="btn-primary" onclick="generateReflection()">✨ Gerar Reflexão</button>
             <button id="cancelBtn" class="btn-link hidden" onclick="cancelEdit()">Cancelar</button>
             <button id="saveBtn" class="btn-primary" onclick="saveEntry()">Publicar</button>
           </div>
         </div>
       </section>
 
-      <!-- Calendário de Navegação -->
+      <!-- Calendário -->
       <section class="calendar-section">
         <div class="calendar-header">
           <button class="btn-link" onclick="changeMonth(-1)">‹</button>
