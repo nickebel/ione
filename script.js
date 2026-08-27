@@ -13,12 +13,15 @@ document.addEventListener("DOMContentLoaded", () => {
 function setDynamicDate() {
   const now = new Date();
   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  document.getElementById("currentDateTitle").textContent = now.toLocaleDateString('pt-BR', options);
+  const formatted = now.toLocaleDateString('pt-BR', options);
+  document.getElementById("currentDateTitle").textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
 function handlePhotoUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
+
+  document.getElementById("fileName").textContent = file.name;
 
   const reader = new FileReader();
   reader.onload = function (event) {
@@ -30,16 +33,16 @@ function handlePhotoUpload(e) {
 }
 
 function saveEntry() {
-  const text = document.getElementById("entryText").value.trim();
+  const textInput = document.getElementById("entryText");
+  const text = textInput.value.trim();
+
   if (!text && !currentPhotoBase64) {
-    alert("Escreva algo ou adicione uma foto!");
     return;
   }
 
   let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
 
   if (editingId) {
-    // Editar registro existente
     entries = entries.map(entry => {
       if (entry.id === editingId) {
         return {
@@ -50,13 +53,10 @@ function saveEntry() {
       }
       return entry;
     });
-    editingId = null;
-    document.getElementById("saveBtn").textContent = "Salvar Registro";
   } else {
-    // Criar novo registro
     const newEntry = {
       id: Date.now(),
-      date: new Date().toLocaleString('pt-BR'),
+      date: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
       text: text,
       photo: currentPhotoBase64
     };
@@ -64,13 +64,7 @@ function saveEntry() {
   }
 
   localStorage.setItem("journal_entries", JSON.stringify(entries));
-
-  // Limpar campos
-  document.getElementById("entryText").value = "";
-  document.getElementById("entryPhoto").value = "";
-  document.getElementById("imagePreviewContainer").innerHTML = "";
-  currentPhotoBase64 = "";
-
+  resetForm();
   renderEntries();
 }
 
@@ -79,85 +73,96 @@ function renderEntries() {
   const container = document.getElementById("entriesList");
 
   if (entries.length === 0) {
-    container.innerHTML = "<p style='color: var(--text-secondary);'>Nenhum registro até agora.</p>";
+    container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">Nenhum registro ainda.</p>`;
     return;
   }
 
   container.innerHTML = entries.map(entry => `
-    <div class="entry-card">
-      <div class="entry-header">
-        <span>${entry.date}</span>
-        <div class="entry-actions">
-          <button class="btn-edit" onclick="editEntry(${entry.id})">✏️ Editar</button>
-          <button class="btn-delete" onclick="deleteEntry(${entry.id})">🗑️ Apagar</button>
+    <article class="entry-card">
+      <div class="entry-meta">
+        <time>${entry.date}</time>
+        <div class="card-actions">
+          <button class="action-btn" onclick="editEntry(${entry.id})">Editar</button>
+          <button class="action-btn delete" onclick="deleteEntry(${entry.id})">Apagar</button>
         </div>
       </div>
-      <p style="white-space: pre-wrap;">${escapeHtml(entry.text)}</p>
-      ${entry.photo ? `<img src="${entry.photo}" class="entry-img" alt="Foto" />` : ''}
-    </div>
+      <div class="entry-body">${escapeHtml(entry.text)}</div>
+      ${entry.photo ? `<img src="${entry.photo}" class="entry-img" alt="Anexo" />` : ''}
+    </article>
   `).join("");
 }
 
-// Preenche o formulário para edição
 function editEntry(id) {
   const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
-  const entryToEdit = entries.find(e => e.id === id);
+  const entry = entries.find(e => e.id === id);
 
-  if (entryToEdit) {
-    document.getElementById("entryText").value = entryToEdit.text;
-    currentPhotoBase64 = entryToEdit.photo || "";
-    
-    if (currentPhotoBase64) {
-      document.getElementById("imagePreviewContainer").innerHTML = 
-        `<img src="${currentPhotoBase64}" class="preview-img" alt="Prévia" />`;
-    } else {
-      document.getElementById("imagePreviewContainer").innerHTML = "";
-    }
+  if (!entry) return;
 
-    editingId = id;
-    document.getElementById("saveBtn").textContent = "Atualizar Registro";
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById("entryText").value = entry.text;
+  editingId = id;
+
+  if (entry.photo) {
+    currentPhotoBase64 = entry.photo;
+    document.getElementById("imagePreviewContainer").innerHTML = 
+      `<img src="${entry.photo}" class="preview-img" alt="Anexo" />`;
+  } else {
+    currentPhotoBase64 = "";
+    document.getElementById("imagePreviewContainer").innerHTML = "";
   }
+
+  document.getElementById("saveBtn").textContent = "Atualizar";
+  document.getElementById("cancelBtn").classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Apagar registro
+function cancelEdit() {
+  resetForm();
+}
+
+function resetForm() {
+  editingId = null;
+  currentPhotoBase64 = "";
+  document.getElementById("entryText").value = "";
+  document.getElementById("entryPhoto").value = "";
+  document.getElementById("fileName").textContent = "";
+  document.getElementById("imagePreviewContainer").innerHTML = "";
+  document.getElementById("saveBtn").textContent = "Publicar";
+  document.getElementById("cancelBtn").classList.add("hidden");
+}
+
 function deleteEntry(id) {
-  if (confirm("Tem certeza que deseja apagar este registro?")) {
+  if (confirm("Deseja apagar esta nota?")) {
     let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
-    entries = entries.filter(entry => entry.id !== id);
+    entries = entries.filter(e => e.id !== id);
     localStorage.setItem("journal_entries", JSON.stringify(entries));
     renderEntries();
   }
 }
 
-// Trocar Fundo Inteiro
-function changeBg(colorName) {
-  document.body.setAttribute("data-bg", colorName);
-  localStorage.setItem("journal_bg", colorName);
+function setPalette(palette) {
+  document.body.setAttribute("data-bg", palette);
+  localStorage.setItem("journal_palette", palette);
 }
 
-// Trocar Tema (Escuro / Claro)
 function toggleTheme() {
-  const body = document.body;
-  const currentTheme = body.getAttribute("data-theme");
-  const newTheme = currentTheme === "dark" ? "light" : "dark";
-  
-  body.setAttribute("data-theme", newTheme);
-  document.getElementById("themeToggleBtn").textContent = newTheme === "dark" ? "🌙 Escuro" : "☀️ Claro";
-  localStorage.setItem("journal_theme", newTheme);
+  const current = document.body.getAttribute("data-theme");
+  const next = current === "dark" ? "light" : "dark";
+  document.body.setAttribute("data-theme", next);
+  document.getElementById("themeToggleBtn").querySelector(".theme-icon").textContent = next === "dark" ? "☼" : "☾";
+  localStorage.setItem("journal_theme", next);
 }
 
 function loadPreferences() {
-  const savedTheme = localStorage.getItem("journal_theme") || "dark";
-  const savedBg = localStorage.getItem("journal_bg") || "default";
+  const theme = localStorage.getItem("journal_theme") || "dark";
+  const palette = localStorage.getItem("journal_palette") || "mono";
 
-  document.body.setAttribute("data-theme", savedTheme);
-  document.body.setAttribute("data-bg", savedBg);
-  document.getElementById("themeToggleBtn").textContent = savedTheme === "dark" ? "🌙 Escuro" : "☀️ Claro";
+  document.body.setAttribute("data-theme", theme);
+  document.body.setAttribute("data-bg", palette);
+  document.getElementById("themeToggleBtn").querySelector(".theme-icon").textContent = theme === "dark" ? "☼" : "☾";
 }
 
 function escapeHtml(text) {
-  return text.replace(/[&<>"']/g, match => ({
+  return text.replace(/[&<>"']/g, m => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[match]));
+  }[m]));
 }
