@@ -1,11 +1,14 @@
 let currentPhotoBase64 = "";
 let editingId = null;
 let currentTab = "active";
+let selectedFilterDate = null;
+let currentCalendarDate = new Date();
 
 document.addEventListener("DOMContentLoaded", () => {
   setDynamicDate();
   loadPreferences();
   cleanOldTrashEntries();
+  renderCalendar();
   renderEntries();
 
   document.getElementById("entryPhoto").addEventListener("change", handlePhotoUpload);
@@ -23,15 +26,21 @@ function handlePhotoUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  document.getElementById("fileName").textContent = file.name;
-
   const reader = new FileReader();
   reader.onload = function (event) {
     currentPhotoBase64 = event.target.result;
     document.getElementById("imagePreviewContainer").innerHTML = 
       `<img src="${currentPhotoBase64}" class="preview-img" alt="Prévia" />`;
+    document.getElementById("removePhotoBtn").classList.remove("hidden");
   };
   reader.readAsDataURL(file);
+}
+
+function removeSelectedPhoto() {
+  currentPhotoBase64 = "";
+  document.getElementById("entryPhoto").value = "";
+  document.getElementById("imagePreviewContainer").innerHTML = "";
+  document.getElementById("removePhotoBtn").classList.add("hidden");
 }
 
 function saveEntry() {
@@ -48,15 +57,20 @@ function saveEntry() {
         return {
           ...entry,
           text: text,
-          photo: currentPhotoBase64 !== "" ? currentPhotoBase64 : entry.photo
+          photo: currentPhotoBase64
         };
       }
       return entry;
     });
   } else {
+    const now = new Date();
+    const isoDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const formattedDate = now.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+
     const newEntry = {
       id: Date.now(),
-      date: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
+      isoDate: isoDate,
+      date: formattedDate,
       text: text,
       photo: currentPhotoBase64,
       deletedAt: null
@@ -66,6 +80,69 @@ function saveEntry() {
 
   localStorage.setItem("journal_entries", JSON.stringify(entries));
   resetForm();
+  renderCalendar();
+  renderEntries();
+}
+
+function renderCalendar() {
+  const year = currentCalendarDate.getFullYear();
+  const month = currentCalendarDate.getMonth();
+
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  document.getElementById("calendarMonthYear").textContent = `${monthNames[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
+  const activeEntries = entries.filter(e => !e.deletedAt);
+
+  let html = "";
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div class="calendar-day empty"></div>`;
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const monthStr = String(month + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const dateKey = `${year}-${monthStr}-${dayStr}`;
+
+    const hasEntry = activeEntries.some(e => e.isoDate === dateKey);
+    const isSelected = selectedFilterDate === dateKey;
+
+    html += `
+      <div class="calendar-day ${hasEntry ? 'has-entry' : ''} ${isSelected ? 'selected' : ''}" 
+           onclick="selectCalendarDate('${dateKey}')">
+        ${day}
+      </div>
+    `;
+  }
+
+  document.getElementById("calendarDays").innerHTML = html;
+}
+
+function changeMonth(delta) {
+  currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+  renderCalendar();
+}
+
+function selectCalendarDate(dateKey) {
+  if (selectedFilterDate === dateKey) {
+    clearDateFilter();
+  } else {
+    selectedFilterDate = dateKey;
+    const [y, m, d] = dateKey.split('-');
+    document.getElementById("filterLabel").textContent = `Filtrado por: ${d}/${m}/${y}`;
+    document.getElementById("filterInfo").classList.remove("hidden");
+    renderCalendar();
+    renderEntries();
+  }
+}
+
+function clearDateFilter() {
+  selectedFilterDate = null;
+  document.getElementById("filterInfo").classList.add("hidden");
+  renderCalendar();
   renderEntries();
 }
 
@@ -73,13 +150,19 @@ function renderEntries() {
   const entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
   const container = document.getElementById("entriesList");
 
-  const filtered = entries.filter(e => currentTab === "trash" ? e.deletedAt !== null : !e.deletedAt);
-  const trashCount = entries.filter(e => e.deletedAt !== null).length;
+  let filtered = entries.filter(e => currentTab === "trash" ? e.deletedAt !== null : !e.deletedAt);
 
+  if (selectedFilterDate && currentTab === "active") {
+    filtered = filtered.filter(e => e.isoDate === selectedFilterDate);
+  }
+
+  const trashCount = entries.filter(e => e.deletedAt !== null).length;
   document.getElementById("trashCount").textContent = trashCount;
 
   if (filtered.length === 0) {
-    const msg = currentTab === "trash" ? "Nenhuma nota na lixeira." : "Nenhum registro até o momento.";
+    const msg = selectedFilterDate 
+      ? "Nenhuma nota registrada nesta data." 
+      : (currentTab === "trash" ? "Nenhuma nota na lixeira." : "Nenhum registro até o momento.");
     container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">${msg}</p>`;
     return;
   }
@@ -98,7 +181,7 @@ function renderEntries() {
       <article class="entry-card">
         <div class="entry-meta">
           <div>
-            <time>${entry.date}</time>
+            <time class="entry-date">${entry.date}</time>
             ${currentTab === "trash" ? `<span class="trash-warning">(Apaga em ${daysRemaining}d)</span>` : ''}
           </div>
           <div class="card-actions">
@@ -129,6 +212,7 @@ function moveToTrash(id) {
   let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
   entries = entries.map(e => e.id === id ? { ...e, deletedAt: Date.now() } : e);
   localStorage.setItem("journal_entries", JSON.stringify(entries));
+  renderCalendar();
   renderEntries();
 }
 
@@ -136,6 +220,7 @@ function restoreEntry(id) {
   let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
   entries = entries.map(e => e.id === id ? { ...e, deletedAt: null } : e);
   localStorage.setItem("journal_entries", JSON.stringify(entries));
+  renderCalendar();
   renderEntries();
 }
 
@@ -144,6 +229,7 @@ function permanentDelete(id) {
     let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
     entries = entries.filter(e => e.id !== id);
     localStorage.setItem("journal_entries", JSON.stringify(entries));
+    renderCalendar();
     renderEntries();
   }
 }
@@ -174,9 +260,9 @@ function editEntry(id) {
     currentPhotoBase64 = entry.photo;
     document.getElementById("imagePreviewContainer").innerHTML = 
       `<img src="${entry.photo}" class="preview-img" alt="Anexo" />`;
+    document.getElementById("removePhotoBtn").classList.remove("hidden");
   } else {
-    currentPhotoBase64 = "";
-    document.getElementById("imagePreviewContainer").innerHTML = "";
+    removeSelectedPhoto();
   }
 
   document.getElementById("saveBtn").textContent = "Atualizar";
@@ -193,8 +279,8 @@ function resetForm() {
   currentPhotoBase64 = "";
   document.getElementById("entryText").value = "";
   document.getElementById("entryPhoto").value = "";
-  document.getElementById("fileName").textContent = "";
   document.getElementById("imagePreviewContainer").innerHTML = "";
+  document.getElementById("removePhotoBtn").classList.add("hidden");
   document.getElementById("saveBtn").textContent = "Publicar";
   document.getElementById("cancelBtn").classList.add("hidden");
 }
@@ -214,7 +300,7 @@ function toggleTheme() {
 
 function loadPreferences() {
   const theme = localStorage.getItem("journal_theme") || "dark";
-  const palette = localStorage.getItem("journal_palette") || "champagne";
+  const palette = localStorage.getItem("journal_palette") || "tweed";
 
   document.body.setAttribute("data-theme", theme);
   document.body.setAttribute("data-palette", palette);
