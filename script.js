@@ -36,9 +36,7 @@ function saveEntry() {
   const textInput = document.getElementById("entryText");
   const text = textInput.value.trim();
 
-  if (!text && !currentPhotoBase64) {
-    return;
-  }
+  if (!text && !currentPhotoBase64) return;
 
   let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
 
@@ -73,7 +71,7 @@ function renderEntries() {
   const container = document.getElementById("entriesList");
 
   if (entries.length === 0) {
-    container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">Nenhum registro ainda.</p>`;
+    container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">Nenhum registro até o momento.</p>`;
     return;
   }
 
@@ -131,7 +129,7 @@ function resetForm() {
 }
 
 function deleteEntry(id) {
-  if (confirm("Deseja apagar esta nota?")) {
+  if (confirm("Deseja remover esta nota?")) {
     let entries = JSON.parse(localStorage.getItem("journal_entries") || "[]");
     entries = entries.filter(e => e.id !== id);
     localStorage.setItem("journal_entries", JSON.stringify(entries));
@@ -140,7 +138,7 @@ function deleteEntry(id) {
 }
 
 function setPalette(palette) {
-  document.body.setAttribute("data-bg", palette);
+  document.body.setAttribute("data-palette", palette);
   localStorage.setItem("journal_palette", palette);
 }
 
@@ -154,10 +152,10 @@ function toggleTheme() {
 
 function loadPreferences() {
   const theme = localStorage.getItem("journal_theme") || "dark";
-  const palette = localStorage.getItem("journal_palette") || "mono";
+  const palette = localStorage.getItem("journal_palette") || "champagne";
 
   document.body.setAttribute("data-theme", theme);
-  document.body.setAttribute("data-bg", palette);
+  document.body.setAttribute("data-palette", palette);
   document.getElementById("themeToggleBtn").querySelector(".theme-icon").textContent = theme === "dark" ? "☼" : "☾";
 }
 
