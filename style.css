@@ -103,13 +103,13 @@ body {
   transition: var(--transition);
 }
 
-/* Data do Topo do Editor Sem Itálico */
+/* Fonte Playfair Display ajustada sem itálico */
 .current-date {
-  font-family: var(--font-serif);
-  font-style: normal;
-  font-weight: 500;
+  font-family: var(--font-serif) !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
   color: var(--text-main);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   margin-bottom: 16px;
 }
 
@@ -119,27 +119,6 @@ textarea {
   line-height: 1.7; resize: vertical; outline: none;
 }
 textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
-
-/* Caixinha da Reflexão da IA */
-.ai-reflection-box {
-  margin-top: 16px;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-  background: rgba(255, 255, 255, 0.03);
-  font-size: 0.9rem;
-  line-height: 1.6;
-}
-
-.ai-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: var(--font-serif);
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: var(--text-muted);
-}
 
 .preview-container { margin-top: 16px; }
 .preview-img {
@@ -174,7 +153,7 @@ input[type="file"] { display: none; }
 
 .action-buttons { display: flex; align-items: center; gap: 12px; }
 
-/* Calendário Minimalista */
+/* Calendário */
 .calendar-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 16px;
@@ -236,8 +215,9 @@ input[type="file"] { display: none; }
 }
 
 .entry-date {
-  font-family: var(--font-serif);
-  font-size: 1rem;
+  font-family: var(--font-serif) !important;
+  font-style: normal !important;
+  font-size: 1.05rem;
   font-weight: 500;
   color: var(--text-main);
 }
