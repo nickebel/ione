@@ -42,7 +42,17 @@
         </div>
         
         <div class="input-group">
-          <textarea id="entryText" placeholder="Como foi o seu dia?"></textarea>
+          <textarea id="entryText" placeholder="Como foi o seu dia? (ou grave um áudio abaixo)"></textarea>
+        </div>
+
+        <!-- Painel do Gravador de Áudio -->
+        <div id="audioRecorderContainer" class="audio-recorder-box hidden">
+          <div class="audio-status">
+            <span class="recording-indicator"></span>
+            <span id="recordingTimer">00:00</span>
+          </div>
+          <audio id="audioPreview" controls class="hidden"></audio>
+          <button id="removeAudioBtn" class="btn-link hidden" onclick="removeAudio()">Remover áudio</button>
         </div>
 
         <div id="imagePreviewContainer" class="preview-container"></div>
@@ -50,9 +60,12 @@
         <div class="editor-footer">
           <div class="file-upload">
             <label for="entryPhoto" class="btn-primary custom-file-btn">
-              📷 Anexar Imagem
+              📷 Imagem
             </label>
             <input type="file" id="entryPhoto" accept="image/*" />
+            <button id="recordAudioBtn" class="btn-primary" onclick="toggleRecording()">
+              🎙️ Gravar Áudio
+            </button>
             <button id="removePhotoBtn" class="btn-link hidden" onclick="removeSelectedPhoto()">Remover imagem</button>
           </div>
 
