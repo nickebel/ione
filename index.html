@@ -3,52 +3,72 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Meu Diário de Bordo</title>
-  
-  <!-- Ícone da Aba do Navegador (Favicon) -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
-  
+  <title>Diário de Bordo</title>
+
+  <!-- Google Fonts: Inter & Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
   <link rel="stylesheet" href="style.css" />
 </head>
-<body data-theme="dark" data-bg="default">
-  <div class="container">
-    <header>
-      <!-- Ícone e Título no Topo do Site -->
+<body data-theme="dark" data-bg="mono">
+  <div class="app-wrapper">
+    <header class="navbar">
       <div class="brand">
-        <span class="header-icon">📖</span>
-        <h1>Diário de Bordo</h1>
+        <span class="symbol">✦</span>
+        <span class="brand-title">Diário</span>
       </div>
-      
-      <div class="controls">
-        <button id="themeToggleBtn">🌙 Escuro</button>
-        
-        <!-- Seleção de Cor do Fundo -->
-        <div class="color-picker" title="Mudar cor do fundo">
-          <span class="color-dot default" onclick="changeBg('default')"></span>
-          <span class="color-dot blue" onclick="changeBg('blue')"></span>
-          <span class="color-dot green" onclick="changeBg('green')"></span>
-          <span class="color-dot purple" onclick="changeBg('purple')"></span>
-          <span class="color-dot warm" onclick="changeBg('warm')"></span>
+
+      <div class="header-controls">
+        <!-- Palette Selectors -->
+        <div class="palette-picker">
+          <button class="dot mono" onclick="setPalette('mono')" title="Monocromático"></button>
+          <button class="dot warm" onclick="setPalette('warm')" title="Areia"></button>
+          <button class="dot sage" onclick="setPalette('sage')" title="Menta Muted"></button>
+          <button class="dot navy" onclick="setPalette('navy')" title="Azul Profundo"></button>
         </div>
+
+        <button id="themeToggleBtn" class="btn-icon" aria-label="Alternar Tema">
+          <span class="theme-icon">☼</span>
+        </button>
       </div>
     </header>
 
-    <main>
-      <section class="entry-form">
-        <h2 id="currentDateTitle">Data</h2>
-        <textarea id="entryText" placeholder="Escreva sobre o seu dia aqui..."></textarea>
-        
-        <div class="form-actions">
-          <label class="file-label" for="entryPhoto">📷 Anexar Foto</label>
-          <input type="file" id="entryPhoto" accept="image/*" />
-          <button id="saveBtn" onclick="saveEntry()">Salvar Registro</button>
+    <main class="content">
+      <section class="editor-section">
+        <div class="editor-header">
+          <p class="current-date" id="currentDateTitle"></p>
         </div>
-        <div id="imagePreviewContainer"></div>
+        
+        <div class="input-group">
+          <textarea id="entryText" placeholder="Como foi o seu dia?"></textarea>
+        </div>
+
+        <div id="imagePreviewContainer" class="preview-container"></div>
+
+        <div class="editor-footer">
+          <div class="file-upload">
+            <label for="entryPhoto" class="btn-secondary">
+              <span class="icon">📷</span> Anexar Imagem
+            </label>
+            <input type="file" id="entryPhoto" accept="image/*" />
+            <span id="fileName" class="file-name"></span>
+          </div>
+
+          <div class="action-buttons">
+            <button id="cancelBtn" class="btn-link hidden" onclick="cancelEdit()">Cancelar</button>
+            <button id="saveBtn" class="btn-primary" onclick="saveEntry()">Publicar</button>
+          </div>
+        </div>
       </section>
 
-      <section class="entries-history">
-        <h2>📜 Registros Anteriores</h2>
-        <div id="entriesList"></div>
+      <section class="timeline-section">
+        <div class="timeline-header">
+          <h2>Memórias Registradas</h2>
+        </div>
+        <div id="entriesList" class="entries-list"></div>
       </section>
     </main>
   </div>
